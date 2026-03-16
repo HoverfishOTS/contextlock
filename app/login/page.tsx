@@ -32,10 +32,23 @@ export default function Login() {
     e.preventDefault()
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
+
+    if (error) {
+      setError(error.message)
+      return
+    }
+
+    // Since confirmation is off, the user session is created immediately.
+    if (data?.session) {
+      router.push('/dashboard')
+    } else {
+      setError('Account created. Please Sign In.')
+    }
+  }
 
     if (error) {
       setError(error.message)
