@@ -50,14 +50,6 @@ export default function Login() {
     }
   }
 
-    if (error) {
-      setError(error.message)
-      return
-    }
-
-    setError('Check your email for the confirmation link.')
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm animate-fade-in rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
