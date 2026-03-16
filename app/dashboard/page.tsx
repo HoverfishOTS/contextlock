@@ -88,7 +88,7 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return <div className="p-8">Loading dashboard...</div>
+    return <div className="p-8 text-slate-500">Loading dashboard...</div>
   }
 
   const totalApplications = applications.length
@@ -106,17 +106,17 @@ export default function Dashboard() {
     { label: 'Applied', count: statusCounts.Applied, color: '#3b82f6' },
     { label: 'Interview', count: statusCounts.Interview, color: '#22c55e' },
     { label: 'Rejected', count: statusCounts.Rejected, color: '#ef4444' },
-    { label: 'Ghosted', count: statusCounts.Ghosted, color: '#9ca3af' },
+    { label: 'Ghosted', count: statusCounts.Ghosted, color: '#64748b' },
   ]
 
   const renderRingChart = () => {
     if (totalApplications === 0) {
-      return <div className="text-gray-400 flex items-center justify-center h-32 w-32 border-4 border-gray-100 rounded-full">No Data</div>
+      return <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-slate-100 text-sm text-slate-400 dark:border-slate-800 dark:text-slate-600">No Data</div>
     }
 
     let cumulativePercent = 0
     return (
-      <svg viewBox="0 0 36 36" className="w-32 h-32">
+      <svg viewBox="0 0 36 36" className="h-32 w-32 drop-shadow-sm">
         {chartData.map((slice, i) => {
           if (slice.count === 0) return null
           const percent = (slice.count / totalApplications) * 100
@@ -144,27 +144,27 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">ContextLock Dashboard</h1>
-        <button onClick={handleSignOut} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+    <div className="mx-auto max-w-7xl p-8 animate-fade-in">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">ContextLock Dashboard</h1>
+        <button onClick={handleSignOut} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600">
           Sign Out
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="border p-6 rounded shadow-sm flex items-center justify-between">
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Ghost Analytics</h2>
-            <div className="flex flex-col gap-2">
-              <p>Total Applications: <span className="font-bold">{totalApplications}</span></p>
-              <p>Response Rate: <span className="font-bold">{responseRate}%</span></p>
+            <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Ghost Analytics</h2>
+            <div className="flex flex-col gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <p>Total Applications: <span className="font-bold text-slate-900 dark:text-slate-200">{totalApplications}</span></p>
+              <p>Response Rate: <span className="font-bold text-slate-900 dark:text-slate-200">{responseRate}%</span></p>
             </div>
             
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
               {chartData.map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                  <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }}></div>
                   <span>{item.label}: {item.count}</span>
                 </div>
               ))}
@@ -175,47 +175,47 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div className="border p-6 rounded shadow-sm flex flex-col items-start gap-4">
-          <h2 className="text-xl font-semibold">Quick Actions</h2>
-          <button onClick={() => router.push('/resumes')} className="text-blue-600 hover:underline">
-            Manage Resumes
+        <div className="flex flex-col items-start gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Quick Actions</h2>
+          <button onClick={() => router.push('/resumes')} className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+            Manage Resumes &rarr;
           </button>
-          <button onClick={() => router.push('/applications/new')} className="text-blue-600 hover:underline">
-            Log New Application
+          <button onClick={() => router.push('/applications/new')} className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+            Log New Application &rarr;
           </button>
         </div>
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold mb-4">Recent Applications</h2>
+        <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">Recent Applications</h2>
         {applications.length === 0 ? (
-          <div className="border rounded p-8 text-center text-gray-500">
+          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             No applications tracked yet.
           </div>
         ) : (
-          <div className="border rounded overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-max">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <table className="w-full min-w-max border-collapse text-left">
+              <thead className="bg-slate-50 text-sm font-semibold text-slate-900 dark:bg-slate-800/50 dark:text-slate-200">
                 <tr>
-                  <th className="p-4 border-b">Company</th>
-                  <th className="p-4 border-b">Role</th>
-                  <th className="p-4 border-b">Status</th>
-                  <th className="p-4 border-b">Description</th>
-                  <th className="p-4 border-b">Resume Used</th>
-                  <th className="p-4 border-b">Date</th>
-                  <th className="p-4 border-b">Actions</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Company</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Role</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Status</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Description</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Resume Used</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Date</th>
+                  <th className="border-b border-slate-200 p-4 dark:border-slate-800">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-sm text-slate-600 dark:text-slate-400">
                 {applications.map((app) => (
-                  <tr key={app.id} className="border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-900">
-                    <td className="p-4 font-medium">{app.company_name}</td>
+                  <tr key={app.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/20">
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-200">{app.company_name}</td>
                     <td className="p-4">{app.job_title}</td>
                     <td className="p-4">
                       <select
                         value={app.status}
                         onChange={(e) => handleStatusUpdate(app.id, e.target.value)}
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        className="block w-full rounded-md border border-slate-300 bg-white p-1.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       >
                         <option value="Applied">Applied</option>
                         <option value="Interview">Interview</option>
@@ -224,26 +224,26 @@ export default function Dashboard() {
                       </select>
                     </td>
                     <td className="p-4">
-                      <div className="max-w-[200px] truncate text-sm text-gray-600 dark:text-gray-400" title={app.job_description}>
+                      <div className="max-w-[200px] truncate" title={app.job_description}>
                         {app.job_description || 'None'}
                       </div>
                     </td>
-                    <td className="p-4 text-sm text-gray-500">
+                    <td className="p-4">
                       <div className="flex items-center gap-2">
                         <span>{app.resumes?.file_name}</span>
                         <button 
                           onClick={() => handleViewResume(app.resumes?.storage_path)}
-                          className="text-blue-600 hover:underline font-semibold"
+                          className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
                         >
                           View
                         </button>
                       </div>
                     </td>
-                    <td className="p-4 text-sm">{new Date(app.created_at).toLocaleDateString()}</td>
+                    <td className="p-4">{new Date(app.created_at).toLocaleDateString()}</td>
                     <td className="p-4">
                       <button 
                         onClick={() => handleDeleteApplication(app.id)}
-                        className="text-red-500 hover:underline text-sm font-semibold"
+                        className="font-medium text-red-500 hover:text-red-400"
                       >
                         Delete
                       </button>

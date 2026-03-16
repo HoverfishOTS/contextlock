@@ -107,28 +107,28 @@ export default function Resumes() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Manage Resumes</h1>
-        <button onClick={() => router.push('/dashboard')} className="text-blue-500 hover:underline">
+    <div className="mx-auto max-w-4xl p-8 animate-fade-in">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Manage Resumes</h1>
+        <button onClick={() => router.push('/dashboard')} className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
           Back to Dashboard
         </button>
       </div>
 
-      <div className="mb-8 p-6 border rounded">
-        <h2 className="text-xl font-semibold mb-4">Upload New Resume</h2>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-        <div className="flex gap-4 items-center">
+      <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Upload New Resume</h2>
+        {error && <div className="mb-4 text-sm font-medium text-red-500">{error}</div>}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <input 
             type="file" 
             accept="application/pdf"
             onChange={handleFileChange}
-            className="border p-2 rounded w-full text-black bg-white"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-700 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:file:bg-slate-800 dark:file:text-blue-400"
           />
           <button 
             onClick={handleUpload} 
             disabled={uploading || !file}
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400"
+            className="whitespace-nowrap rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-50 dark:disabled:bg-slate-700"
           >
             {uploading ? 'Uploading...' : 'Upload'}
           </button>
@@ -136,21 +136,21 @@ export default function Resumes() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Your Resumes</h2>
+        <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Your Resumes</h2>
         {resumes.length === 0 ? (
-          <p className="text-gray-500">No resumes uploaded yet.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">No resumes uploaded yet.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="flex flex-col gap-3">
             {resumes.map((resume) => (
-              <li key={resume.id} className="border p-4 rounded flex justify-between items-center">
-                <span>{resume.file_name}</span>
+              <li key={resume.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-blue-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900">
+                <span className="font-medium text-slate-900 dark:text-slate-200">{resume.file_name}</span>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
                     {new Date(resume.created_at).toLocaleDateString()}
                   </span>
                   <button 
                     onClick={() => handleViewResume(resume.storage_path)}
-                    className="text-blue-600 hover:underline text-sm font-semibold"
+                    className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     View
                   </button>

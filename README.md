@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ContextLock
 
-## Getting Started
+Version Control for Your Resume. 
 
-First, run the development server:
+ContextLock is a web application designed to solve the "Application Black Hole" for high-volume job seekers. It forces users to link a specific version of their resume (PDF) to every job application they log, ensuring exact historical context for interviews. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Developed as an MVP for CS4800: Software Engineering.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Asset Locking:** Users cannot log a job application without committing the specific PDF resume used for that role.
+* **Resume Storage:** Secure cloud storage and retrieval of all uploaded resumes.
+* **Application Tracker:** A centralized dashboard to manage application statuses (Applied, Interview, Rejected, Ghosted) and job descriptions.
+* **Ghost Analytics:** Real-time data visualization of application volume and response rates.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
+* **Frontend:** Next.js (App Router), React, Tailwind CSS
+* **Backend:** Next.js API Routes, Supabase
+* **Database & Auth:** Supabase (PostgreSQL, Supabase Auth)
+* **Storage:** Supabase Storage (Object storage for PDFs)
+* **Deployment:** Vercel
 
-To learn more about Next.js, take a look at the following resources:
+## Local Development Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository:**
+    ```bash
+    git clone [https://github.com/HoverfishOTS/contextlock.git](https://github.com/HoverfishOTS/contextlock.git)
+    cd contextlock
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## Deploy on Vercel
+3. **Set up Supabase:**
+   * Create a new project on Supabase.
+   * Navigate to the SQL Editor and run the schema setup script (refer to project documentation for the exact SQL script to provision tables, triggers, and Row Level Security policies).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Configure Environment Variables:**
+   * Create a `.env.local` file in the root directory.
+   * Add your Supabase project credentials (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    Open http://localhost:3000 with your browser to see the result.
+
+## Architecture
+
+ContextLock utilizes a client-side architecture where the Next.js frontend communicates directly with Supabase via a singleton client. Security is enforced at the database level using PostgreSQL Row Level Security (RLS) policies, ensuring users can only access their own uploaded assets and application records.
+
+## License
+
+Distributed under the MIT License. See LICENSE for more information.
