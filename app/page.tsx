@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import NetworkMesh from './components/NetworkMesh'
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 text-center sm:p-20">
+    <>
+      <NetworkMesh />
+      <div className="flex min-h-screen flex-col items-center justify-center p-8 text-center sm:p-20 relative z-10">
       <main className="flex max-w-3xl flex-col items-center gap-8 animate-fade-in">
         <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl text-slate-900 dark:text-white">
           ContextLock
@@ -48,5 +51,6 @@ export default function Home() {
         </div>
       </section>
     </div>
+    </>
   )
 }
