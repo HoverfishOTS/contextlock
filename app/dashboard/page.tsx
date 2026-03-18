@@ -8,6 +8,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [applications, setApplications] = useState<any[]>([])
+  
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list')
+  const [selectedApp, setSelectedApp] = useState<any | null>(null)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [editedDescriptionText, setEditedDescriptionText] = useState('')
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -85,6 +91,32 @@ export default function Dashboard() {
     if (data?.signedUrl) {
       window.open(data.signedUrl, '_blank')
     }
+  }
+
+  const handleEditDescription = () => {
+    setIsEditingDescription(true)
+    setEditedDescriptionText(selectedApp?.job_description || '')
+  }
+
+  const handleSaveDescription = async () => {
+    if (!selectedApp) return
+
+    const { error } = await supabase
+      .from('applications')
+      .update({ job_description: editedDescriptionText })
+      .eq('id', selectedApp.id)
+
+    if (error) {
+      console.error('Failed to update description:', error)
+      return
+    }
+
+    const updatedApp = { ...selectedApp, job_description: editedDescriptionText }
+    setApplications((prev) =>
+      prev.map((app) => (app.id === selectedApp.id ? updatedApp : app))
+    )
+    setSelectedApp(updatedApp)
+    setIsEditingDescription(false)
   }
 
   if (loading) {
@@ -187,12 +219,36 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-xl font-bold text-slate-900 dark:text-white">Recent Applications</h2>
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Recent Applications</h2>
+          <div className="flex w-fit overflow-hidden rounded-lg border border-slate-200 shadow-sm dark:border-slate-800 text-sm">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-1.5 font-medium transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
+              }`}
+            >
+              List View
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              className={`border-l border-slate-200 px-4 py-1.5 font-medium transition-colors dark:border-slate-800 ${
+                viewMode === 'card'
+                  ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800'
+              }`}
+            >
+              Card View
+            </button>
+          </div>
+        </div>
         {applications.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             No applications tracked yet.
           </div>
-        ) : (
+        ) : viewMode === 'list' ? (
           <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full min-w-max border-collapse text-left">
               <thead className="bg-slate-50 text-sm font-semibold text-slate-900 dark:bg-slate-800/50 dark:text-slate-200">
@@ -241,20 +297,185 @@ export default function Dashboard() {
                     </td>
                     <td className="p-4">{new Date(app.created_at).toLocaleDateString()}</td>
                     <td className="p-4">
-                      <button 
-                        onClick={() => handleDeleteApplication(app.id)}
-                        className="font-medium text-red-500 hover:text-red-400"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => setSelectedApp(app)}
+                          className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                        >
+                          Details
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteApplication(app.id)}
+                          className="font-medium text-red-500 hover:text-red-400"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {applications.map((app) => (
+              <div key={app.id} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div>
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{app.job_title}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{app.company_name}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {new Date(app.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-4 mt-4">
+                    <select
+                      value={app.status}
+                      onChange={(e) => handleStatusUpdate(app.id, e.target.value)}
+                      className="block w-full rounded-md border border-slate-300 bg-white p-1.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      <option value="Applied">Applied</option>
+                      <option value="Interview">Interview</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="Ghosted">Ghosted</option>
+                    </select>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-400" title={app.job_description}>
+                      {app.job_description || <span className="italic opacity-50">No description provided.</span>}
+                    </p>
+                  </div>
+
+                  {app.resumes?.file_name && (
+                    <div className="mb-4 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <span className="truncate">📎 {app.resumes.file_name}</span>
+                      <button 
+                        onClick={() => handleViewResume(app.resumes?.storage_path)}
+                        className="shrink-0 font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                      >
+                        View
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-4 flex gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                  <button 
+                    onClick={() => setSelectedApp(app)}
+                    className="flex-1 rounded-lg bg-blue-50 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                  >
+                    Details
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteApplication(app.id)}
+                    className="flex-1 rounded-lg bg-red-50 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Details Modal */}
+      {selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm transition-opacity">
+          <div className="flex w-full max-w-2xl max-h-[90vh] flex-col rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 sm:p-8">
+            <div className="mb-6 flex shrink-0 items-start justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedApp.job_title}</h2>
+                <p className="text-lg text-slate-600 dark:text-slate-400">{selectedApp.company_name}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedApp(null)
+                  setIsEditingDescription(false)
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto pr-2">
+              <div className="mb-6 grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Status</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{selectedApp.status}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Date Applied</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{new Date(selectedApp.created_at).toLocaleDateString()}</p>
+                </div>
+                {selectedApp.resumes?.file_name && (
+                  <div className="col-span-2">
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Resume Used</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-slate-900 dark:text-white">{selectedApp.resumes.file_name}</p>
+                      <button 
+                        onClick={() => handleViewResume(selectedApp.resumes?.storage_path)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                      >
+                        (View)
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Job Description</h3>
+                  {!isEditingDescription && (
+                    <button
+                      onClick={handleEditDescription}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                    >
+                      Edit Description
+                    </button>
+                  )}
+                </div>
+                
+                {isEditingDescription ? (
+                  <div className="flex flex-col gap-3">
+                    <textarea
+                      value={editedDescriptionText}
+                      onChange={(e) => setEditedDescriptionText(e.target.value)}
+                      className="min-h-[200px] w-full rounded-xl border border-slate-300 bg-white p-4 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      placeholder="Paste the full job description here..."
+                    />
+                    <div className="flex justify-end gap-3">
+                      <button
+                        onClick={() => setIsEditingDescription(false)}
+                        className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveDescription}
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="min-h-[100px] whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700 dark:bg-slate-800/50 dark:text-slate-300">
+                    {selectedApp.job_description || <span className="italic text-slate-400">No description provided.</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
