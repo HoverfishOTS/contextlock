@@ -1,16 +1,8 @@
 import { chromium } from 'playwright';
-import fs from 'fs';
-import path from 'path';
 
 // Default configuration
 const TARGET_URL = process.argv[2] || 'http://localhost:3000';
 const NUM_USERS = parseInt(process.argv[3]) || 100;
-
-// Generate dummy PDF for uploads
-const dummyPdfPath = path.join(process.cwd(), 'dummy_resume.pdf');
-if (!fs.existsSync(dummyPdfPath)) {
-  fs.writeFileSync(dummyPdfPath, '%PDF-1.4\n1 0 obj\n<< /Title (Dummy Resume) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF');
-}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomWait = (min, max) => sleep(Math.floor(Math.random() * (max - min + 1)) + min);
@@ -43,35 +35,20 @@ async function simulateUser(index) {
     await simulateScroll(page);
     await randomWait(2000, 4000); 
     
-    // 2. Navigate to Login page and SIGN UP
+    // 2. Navigate to Login page
     await page.goto(`${TARGET_URL}/login`, { waitUntil: 'networkidle' }).catch(() => {});
     await simulateScroll(page);
-    
-    const randomEmail = `user${Date.now()}${Math.floor(Math.random()*1000)}@test.contextlock.app`;
-    console.log(`[User ${index}/${NUM_USERS}] Signing up with ${randomEmail}`);
-    await page.fill('input[type="email"]', randomEmail);
-    await page.fill('input[type="password"]', 'StrongPass123!');
-    await page.click('button:has-text("REGISTER")');
-    await randomWait(4000, 7000); // Wait for redirect to Dashboard
+    await randomWait(4000, 7000);
 
-    // 3. Navigate to Resumes to UPLOAD
+    // 3. Navigate to Resumes view
     await page.goto(`${TARGET_URL}/resumes`, { waitUntil: 'networkidle' }).catch(() => {});
-    await randomWait(2000, 3000);
-    console.log(`[User ${index}/${NUM_USERS}] Uploading mock resume...`);
-    await page.setInputFiles('input[type="file"]', dummyPdfPath).catch(() => {});
-    await randomWait(1000, 2000);
-    await page.click('button:has-text("COMMIT")').catch(() => {});
-    await randomWait(5000, 8000); // Wait for upload to complete
+    await randomWait(2000, 5000);
+    await simulateScroll(page);
 
-    // 4. Navigate to Applications/New to log a mock application
+    // 4. Navigate to Applications/New
     await page.goto(`${TARGET_URL}/applications/new`, { waitUntil: 'networkidle' }).catch(() => {});
     await simulateScroll(page);
-    
-    console.log(`[User ${index}/${NUM_USERS}] Filing job application...`);
-    await page.fill('input#companyName', 'Acme Mock Inc.').catch(() => {});
-    await page.fill('input#jobTitle', 'Software Engineer').catch(() => {});
-    await page.click('button:has-text("LOG APPLICATION")').catch(() => {});
-    await randomWait(4000, 6000); 
+    await randomWait(4000, 7000); 
     
     console.log(`[User ${index}/${NUM_USERS}] Finished session successfully.`);
   } catch (error) {
