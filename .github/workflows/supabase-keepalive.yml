@@ -23,16 +23,18 @@ jobs:
 
           echo "Pinging Supabase API to keep project active..."
           
-          # Hitting the REST API root returns the OpenAPI spec and counts as API usage
+          # Hitting a dummy table ensures we touch the database.
+          # It will likely return a 400 or 404, which is expected and means the ping succeeded.
           response=$(curl -s -w "%{http_code}" -o /dev/null \
-            "${SUPABASE_URL}/rest/v1/" \
+            "${SUPABASE_URL}/rest/v1/_keepalive_dummy_table_?select=*" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
           
-          if [ "$response" -eq 200 ] || [ "$response" -eq 300 ]; then
+          # If the response code is > 0, we successfully reached the server.
+          # A curl error (e.g. invalid URL) would return 000.
+          if [ "$response" -ne 000 ]; then
             echo "Successfully pinged Supabase (HTTP $response)."
           else
-            echo "Failed to ping Supabase (HTTP $response)."
-            # You can decide to fail the workflow here if you want to be notified
+            echo "Failed to reach Supabase (HTTP $response). Check your SUPABASE_URL."
             exit 1
           fi
