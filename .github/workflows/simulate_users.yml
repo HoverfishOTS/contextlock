@@ -1,0 +1,63 @@
+name: Simulate GA4 Users Traffic
+
+on:
+  schedule:
+    # Triggers daily at 12:00 UTC, but the script will randomly self-cancel 
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to run the simulation against (e.g. your Vercel deployment URL)'
+        required: true
+        default: 'https://your-vercel-domain.vercel.app'
+      users_per_node:
+        description: 'Number of simulated users per IP node'
+        required: false
+        default: '20'
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [1, 2, 3, 4, 5]
+        
+    steps:
+      - name: Randomizer check
+        id: randomizer
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            # Roughly 1 in 2.5 chance of running each day (averaging every 2-3 days)
+            if [ $((RANDOM % 3)) -ne 0 ]; then
+              echo "Skipping simulation today. See you tomorrow!"
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "Lucky day! Running the simulation."
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+             echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Checkout repository
+        if: steps.randomizer.outputs.skip != 'true'
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        if: steps.randomizer.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        if: steps.randomizer.outputs.skip != 'true'
+        run: npm ci || npm install
+        
+      - name: Install Playwright Browsers
+        if: steps.randomizer.outputs.skip != 'true'
+        run: npx playwright install --with-deps chromium
+        
+      - name: Run Simulation Script
+        if: steps.randomizer.outputs.skip != 'true'
+        run: node scripts/simulate_ga_users.mjs "${{ github.event.inputs.target_url }}" "${{ github.event.inputs.users_per_node }}"

@@ -36,7 +36,7 @@ export default function NewApplication() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      setError('Failed to load resumes.')
+      setError('Failed to load context documents.')
     } else {
       setResumes(data || [])
       if (data && data.length > 0) {
@@ -59,7 +59,7 @@ export default function NewApplication() {
     }
 
     if (!selectedResumeId) {
-      setError('You must select a resume to lock to this application.')
+      setError('Architecture requires an active Context Document to proceed.')
       setSubmitting(false)
       return
     }
@@ -86,95 +86,118 @@ export default function NewApplication() {
   }
 
   if (loading) {
-    return <div className="p-8 text-slate-500">Loading...</div>
+    return <div className="p-8 text-slate-500 min-h-screen bg-transparent"></div>
   }
 
-  const inputClasses = "rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-blue-500"
+  const inputClass = "w-full border-b border-slate-300 dark:border-slate-700 bg-transparent py-4 text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#66023c] dark:focus:border-[#d69cae] focus:outline-none transition-colors rounded-none text-xl font-light"
+  const labelClass = "text-[11px] font-bold uppercase tracking-[0.2em] text-[#66023c] dark:text-[#d69cae]"
+  const primaryButton = "bg-[#66023c] text-white dark:bg-[#e5cfac] dark:text-[#66023c] font-medium tracking-tight px-8 py-4 transition-colors rounded-none hover:bg-black dark:hover:bg-white inline-flex items-center justify-center min-w-[200px] disabled:opacity-30"
 
   return (
-    <div className="mx-auto max-w-2xl p-8 animate-fade-in">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Log New Application</h1>
-        <button onClick={() => router.push('/dashboard')} className="text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-          Cancel
-        </button>
+    <div className="mx-auto max-w-4xl p-8 lg:p-16 xl:p-24 selection:bg-[#66023c] selection:text-white min-h-screen flex flex-col justify-center">
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .anim-fade-up { opacity: 0; animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      `}</style>
+
+      <div className="mb-24 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-8 anim-fade-up" style={{ animationDelay: '0ms' }}>
+        <div>
+          <h1 className="text-6xl md:text-8xl font-semibold tracking-tighter text-slate-900 dark:text-white leading-[0.9]">
+            Apply<span className="text-[#66023c] dark:text-[#d69cae]">.</span>
+          </h1>
+          <p className="mt-4 text-sm font-medium tracking-wide text-slate-500 dark:text-slate-400">
+            Log New Application Record
+          </p>
+        </div>
+        <div className="flex items-center gap-6">
+          <button onClick={() => router.push('/dashboard')} className="text-[#66023c] hover:text-[#400529] font-medium tracking-tight dark:text-[#d69cae] dark:hover:text-white transition-colors uppercase text-xs tracking-widest">
+            CANCEL / RETURN
+          </button>
+        </div>
       </div>
 
       {resumes.length === 0 ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-800 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
-          <h2 className="mb-2 font-bold">Asset Lock Enforced</h2>
-          <p className="mb-4 text-sm">You cannot log an application without a resume in the system.</p>
+        <div className="anim-fade-up" style={{ animationDelay: '100ms' }}>
+          <h2 className="text-2xl font-bold tracking-tight text-[#66023c] dark:text-[#d69cae] mb-4">Asset Lock Enforced.</h2>
+          <p className="mb-8 text-lg font-medium text-slate-600 dark:text-slate-400">ContextLock requires a resume uploaded to the system to log an application.</p>
           <button 
             onClick={() => router.push('/resumes')}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+            className={primaryButton}
           >
-            Upload a Resume
+            Upload Resume
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          {error && <div className="text-sm font-medium text-red-500">{error}</div>}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-16 pb-24 anim-fade-up" style={{ animationDelay: '100ms' }}>
+          {error && <div className="text-xs font-semibold uppercase tracking-widest text-[#66023c] dark:text-[#d69cae]">{error}</div>}
           
-          <div className="flex flex-col gap-2">
-            <label htmlFor="companyName" className="text-sm font-semibold text-slate-900 dark:text-slate-200">Company Name</label>
+          <div className="flex flex-col gap-4">
+            <label htmlFor="companyName" className={labelClass}>Company Name</label>
             <input
               id="companyName"
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className={inputClasses}
+              className={inputClass}
+              placeholder="E.g., Acme Corp..."
               required
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="jobTitle" className="text-sm font-semibold text-slate-900 dark:text-slate-200">Job Title</label>
+          <div className="flex flex-col gap-4">
+            <label htmlFor="jobTitle" className={labelClass}>Job Title</label>
             <input
               id="jobTitle"
               type="text"
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
-              className={inputClasses}
+              className={inputClass}
+              placeholder="E.g., Senior Engineer..."
               required
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="jobDescription" className="text-sm font-semibold text-slate-900 dark:text-slate-200">Job Description</label>
-            <textarea
-              id="jobDescription"
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              className={`${inputClasses} h-32 resize-y`}
-              placeholder="Paste the job description here..."
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="resumeSelect" className="text-sm font-semibold text-slate-900 dark:text-slate-200">Lock Resume to Application</label>
+          <div className="flex flex-col gap-4">
+            <label htmlFor="resumeSelect" className={labelClass}>Select Resume</label>
             <select
               id="resumeSelect"
               value={selectedResumeId}
               onChange={(e) => setSelectedResumeId(e.target.value)}
-              className={inputClasses}
+              className={inputClass}
               required
             >
-              <option value="" disabled>Select a resume...</option>
+              <option value="" disabled>Select a valid resume...</option>
               {resumes.map((resume) => (
-                <option key={resume.id} value={resume.id}>
+                <option key={resume.id} value={resume.id} className="bg-white dark:bg-black">
                   {resume.file_name}
                 </option>
               ))}
             </select>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={submitting}
-            className="mt-4 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-500 disabled:bg-slate-400 disabled:opacity-50 dark:disabled:bg-slate-700"
-          >
-            {submitting ? 'Logging...' : 'Log Application'}
-          </button>
+          <div className="flex flex-col gap-4">
+            <label htmlFor="jobDescription" className={labelClass}>Job Description (Optional)</label>
+            <textarea
+              id="jobDescription"
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              className={`${inputClass} h-40 resize-y`}
+              placeholder="Paste job description here..."
+            />
+          </div>
+
+          <div className="flex justify-start">
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className={primaryButton}
+            >
+              {submitting ? 'LOGGING...' : 'LOG APPLICATION'}
+            </button>
+          </div>
         </form>
       )}
     </div>
